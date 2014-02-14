@@ -402,12 +402,12 @@ class CointipBot(object):
                 values = []
                 result = 0.0
 
-                if not self.conf.coins[c].unit == 'btc':
+                if not self.conf.coins[c].unit == self.conf.misc.reserve_coin:
                     # For each exchange that supports this coin...
                     for e in self.exchanges:
-                        if self.exchanges[e].supports_pair(_name1=self.conf.coins[c].unit, _name2='btc'):
+                        if self.exchanges[e].supports_pair(_name1=self.conf.coins[c].unit, _name2=self.conf.misc.reserve_coin):
                             # Get ticker value from exchange
-                            value = self.exchanges[e].get_ticker_value(_name1=self.conf.coins[c].unit, _name2='btc')
+                            value = self.exchanges[e].get_ticker_value(_name1=self.conf.coins[c].unit, _name2=self.conf.misc.reserve_coin)
                             if value and float(value) > 0.0:
                                 values.append(float(value))
 
@@ -422,7 +422,7 @@ class CointipBot(object):
                 # Assign result to self.runtime['ev']
                 if not self.runtime['ev'].has_key(c):
                     self.runtime['ev'][c] = {}
-                self.runtime['ev'][c]['btc'] = result
+                self.runtime['ev'][c][self.conf.misc.reserve_coin] = result
 
         # For each enabled fiat...
         for f in vars(self.conf.fiat):
@@ -434,9 +434,9 @@ class CointipBot(object):
 
                 # For each exchange that supports this fiat...
                 for e in self.exchanges:
-                    if self.exchanges[e].supports_pair(_name1='btc', _name2=self.conf.fiat[f].unit):
+                    if self.exchanges[e].supports_pair(_name1=self.conf.misc.reserve_coin, _name2=self.conf.fiat[f].unit):
                         # Get ticker value from exchange
-                        value = self.exchanges[e].get_ticker_value(_name1='btc', _name2=self.conf.fiat[f].unit)
+                        value = self.exchanges[e].get_ticker_value(_name1=self.conf.misc.reserve_coin, _name2=self.conf.fiat[f].unit)
                         if value and float(value) > 0.0:
                             values.append(float(value))
 
@@ -445,9 +445,9 @@ class CointipBot(object):
                     result = sum(values) / float(len(values))
 
                 # Assign result to self.runtime['ev']
-                if not self.runtime['ev'].has_key('btc'):
-                    self.runtime['ev']['btc'] = {}
-                self.runtime['ev']['btc'][f] = result
+                if not self.runtime['ev'].has_key(self.conf.misc.reserve_coin):
+                    self.runtime['ev'][self.conf.misc.reserve_coin] = {}
+                self.runtime['ev'][self.conf.misc.reserve_coin][f] = result
 
         lg.debug("CointipBot::refresh_ev(): %s", self.runtime['ev'])
 
@@ -459,7 +459,7 @@ class CointipBot(object):
         Quick method to return _fiat value of _coin
         """
         try:
-            value = self.runtime['ev'][_coin]['btc'] * self.runtime['ev']['btc'][_fiat]
+            value = self.runtime['ev'][_coin][self.conf.misc.reserve_coin] * self.runtime['ev'][self.conf.misc.reserve_coin][_fiat]
         except KeyError as e:
             lg.warning("CointipBot::coin_value(%s, %s): KeyError", _coin, _fiat)
             value = 0.0

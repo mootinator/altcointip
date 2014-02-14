@@ -16,3 +16,5 @@ notify:
     smtp_tls: true
     smtp_username: 'user@example.com'
     smtp_password: 'examplePass'
+
+reserve_coin: 'btc'

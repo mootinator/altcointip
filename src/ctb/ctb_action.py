@@ -869,21 +869,21 @@ class CtbAction(object):
         for coin in self.ctb.coins:
             coins.append(coin)
             rates[coin] = {'average': {}}
-            rates[coin]['average']['btc'] = self.ctb.runtime['ev'][coin]['btc']
-            rates[coin]['average'][fiat] = self.ctb.runtime['ev'][coin]['btc'] * self.ctb.runtime['ev']['btc'][fiat]
+            rates[coin]['average'][self.ctb.conf.misc.reserve_coin] = self.ctb.runtime['ev'][coin][self.ctb.conf.misc.reserve_coin]
+            rates[coin]['average'][fiat] = self.ctb.runtime['ev'][coin][self.ctb.conf.misc.reserve_coin] * self.ctb.runtime['ev'][self.ctb.conf.misc.reserve_coin][fiat]
             for exchange in self.ctb.exchanges:
                 try:
                     rates[coin][exchange] = {}
-                    if self.ctb.exchanges[exchange].supports_pair(_name1=coin, _name2='btc'):
-                        rates[coin][exchange]['btc'] = self.ctb.exchanges[exchange].get_ticker_value(_name1=coin, _name2='btc')
-                        if coin == 'btc' and self.ctb.exchanges[exchange].supports_pair(_name1='btc', _name2=fiat):
+                    if self.ctb.exchanges[exchange].supports_pair(_name1=coin, _name2=self.ctb.conf.misc.reserve_coin):
+                        rates[coin][exchange][self.ctb.conf.misc.reserve_coin] = self.ctb.exchanges[exchange].get_ticker_value(_name1=coin, _name2=self.ctb.conf.misc.reserve_coin)
+                        if coin == self.ctb.conf.misc.reserve_coin and self.ctb.exchanges[exchange].supports_pair(_name1=self.ctb.conf.misc.reserve_coin, _name2=fiat):
                             # Use exchange value to calculate btc's fiat value
-                            rates[coin][exchange][fiat] = rates[coin][exchange]['btc'] * self.ctb.exchanges[exchange].get_ticker_value(_name1='btc', _name2=fiat)
+                            rates[coin][exchange][fiat] = rates[coin][exchange][self.ctb.conf.misc.reserve_coin] * self.ctb.exchanges[exchange].get_ticker_value(_name1=self.ctb.conf.misc.reserve_coin, _name2=fiat)
                         else:
                             # Use average value to calculate coin's fiat value
-                            rates[coin][exchange][fiat] = rates[coin][exchange]['btc'] * self.ctb.runtime['ev']['btc'][fiat]
+                            rates[coin][exchange][fiat] = rates[coin][exchange][self.ctb.conf.misc.reserve_coin] * self.ctb.runtime['ev'][self.ctb.conf.misc.reserve_coin][fiat]
                     else:
-                        rates[coin][exchange]['btc'] = None
+                        rates[coin][exchange][self.ctb.conf.misc.reserve_coin] = None
                         rates[coin][exchange][fiat] = None
                 except TypeError as e:
                     msg = self.ctb.jenv.get_template('rates-error.tpl').render(exchange=exchange, a=self, ctb=self.ctb)
